@@ -1,17 +1,17 @@
-" ============================================================================
+" ----------------------------------------------------------------------------
 " File:        git_status.vim
 " Description: plugin for NERD Tree that provides git status support
-" Maintainer:  Xuyuan Pang <xuyuanp at gmail dot com>
-" Last Change: 4 Apr 2014
-" License:     This program is free software. It comes without any warranty,
-"              to the extent permitted by applicable law. You can redistribute
-"              it and/or modify it under the terms of the Do What The Fuck You
-"              Want To Public License, Version 2, as published by Sam Hocevar.
-"              See http://sam.zoy.org/wtfpl/COPYING for more details.
-" ============================================================================
-if exists('g:loaded_nerdtree_git_status')
+" Maintainer:  Jan Moeller <secded@gmail.com>
+" License:     OSI approved MIT license (see end of this file)
+" Last Change: Thu, 20 Sep 2018 20:26:17 +0200
+" ----------------------------------------------------------------------------
+scriptencoding utf-8
+
+if &cp || exists('g:loaded_nerdtree_git_status')
     finish
 endif
+
+" Make sure the plug-in is only loaded once.
 let g:loaded_nerdtree_git_status = 1
 
 if !exists('g:NERDTreeShowGitStatus')
@@ -57,7 +57,7 @@ if !exists('s:NERDTreeIndicatorMap')
                 \ }
 endif
 
-
+" FUNCTION: NERDTreeGitStatusRefreshListener(event) {{{1
 function! NERDTreeGitStatusRefreshListener(event)
     if !exists('b:NOT_A_GIT_REPOSITORY')
         call g:NERDTreeGitStatusRefresh()
@@ -70,14 +70,14 @@ function! NERDTreeGitStatusRefreshListener(event)
     endif
 endfunction
 
-" FUNCTION: g:NERDTreeGitStatusRefresh() {{{2
+" FUNCTION: g:NERDTreeGitStatusRefresh() {{{1
 " refresh cached git status
 function! g:NERDTreeGitStatusRefresh()
     let b:NERDTreeCachedGitFileStatus = {}
     let b:NERDTreeCachedGitDirtyDir   = {}
     let b:NOT_A_GIT_REPOSITORY        = 1
 
-    let l:root = fnamemodify(b:NERDTree.root.path.str(), ":p:S")
+    let l:root = fnamemodify(b:NERDTree.root.path.str(), ':p:gs?\\?/?:S')
     let l:gitcmd = 'git -c color.status=false status -s'
     if g:NERDTreeShowIgnoredStatus
         let l:gitcmd = l:gitcmd . ' --ignored'
@@ -113,7 +113,7 @@ function! g:NERDTreeGitStatusRefresh()
         let l:statusKey = s:NERDTreeGetFileGitStatusKey(l:statusLine[0], l:statusLine[1])
         let b:NERDTreeCachedGitFileStatus[fnameescape(l:pathStr)] = l:statusKey
 
-        if l:statusKey == 'Ignored'
+        if l:statusKey ==# 'Ignored'
             if isdirectory(l:pathStr)
                 let b:NERDTreeCachedGitDirtyDir[fnameescape(l:pathStr)] = l:statusKey
             endif
@@ -123,6 +123,7 @@ function! g:NERDTreeGitStatusRefresh()
     endfor
 endfunction
 
+" FUNCTION: s:NERDTreeCacheDirtyDir(pathStr) {{{1
 function! s:NERDTreeCacheDirtyDir(pathStr)
     " cache dirty dir
     let l:dirtyPath = s:NERDTreeTrimDoubleQuotes(a:pathStr)
@@ -136,13 +137,14 @@ function! s:NERDTreeCacheDirtyDir(pathStr)
     endwhile
 endfunction
 
+" FUNCTION: s:NERDTreeTrimDoubleQuotes(pathStr) {{{1
 function! s:NERDTreeTrimDoubleQuotes(pathStr)
     let l:toReturn = substitute(a:pathStr, '^"', '', '')
     let l:toReturn = substitute(l:toReturn, '"$', '', '')
     return l:toReturn
 endfunction
 
-" FUNCTION: g:NERDTreeGetGitStatusPrefix(path) {{{2
+" FUNCTION: g:NERDTreeGetGitStatusPrefix(path) {{{1
 " return the indicator of the path
 " Args: path
 let s:GitStatusCacheTimeExpiry = 2
@@ -169,7 +171,7 @@ function! g:NERDTreeGetGitStatusPrefix(path)
     return s:NERDTreeGetIndicator(l:statusKey)
 endfunction
 
-" FUNCTION: s:NERDTreeGetCWDGitStatus() {{{2
+" FUNCTION: s:NERDTreeGetCWDGitStatus() {{{1
 " return the indicator of cwd
 function! g:NERDTreeGetCWDGitStatus()
     if b:NOT_A_GIT_REPOSITORY
@@ -180,6 +182,7 @@ function! g:NERDTreeGetCWDGitStatus()
     return s:NERDTreeGetIndicator('Dirty')
 endfunction
 
+" FUNCTION: s:NERDTreeGetIndicator(statusKey) {{{1
 function! s:NERDTreeGetIndicator(statusKey)
     if exists('g:NERDTreeIndicatorMapCustom')
         let l:indicator = get(g:NERDTreeIndicatorMapCustom, a:statusKey, '')
@@ -194,6 +197,7 @@ function! s:NERDTreeGetIndicator(statusKey)
     return ''
 endfunction
 
+" FUNCTION: s:NERDTreeGetFileGitStatusKey(us, them) {{{1
 function! s:NERDTreeGetFileGitStatusKey(us, them)
     if a:us ==# '?' && a:them ==# '?'
         return 'Untracked'
@@ -214,7 +218,7 @@ function! s:NERDTreeGetFileGitStatusKey(us, them)
     endif
 endfunction
 
-" FUNCTION: s:jumpToNextHunk(node) {{{2
+" FUNCTION: s:jumpToNextHunk(node) {{{1
 function! s:jumpToNextHunk(node)
     let l:position = search('\[[^{RO}].*\]', '')
     if l:position
@@ -222,7 +226,7 @@ function! s:jumpToNextHunk(node)
     endif
 endfunction
 
-" FUNCTION: s:jumpToPrevHunk(node) {{{2
+" FUNCTION: s:jumpToPrevHunk(node) {{{1
 function! s:jumpToPrevHunk(node)
     let l:position = search('\[[^{RO}].*\]', 'b')
     if l:position
@@ -230,7 +234,7 @@ function! s:jumpToPrevHunk(node)
     endif
 endfunction
 
-" Function: s:SID()   {{{2
+" FUNCTION: s:SID() {{{1
 function s:SID()
     if !exists('s:sid')
         let s:sid = matchstr(expand('<sfile>'), '<SNR>\zs\d\+\ze_SID$')
@@ -238,7 +242,7 @@ function s:SID()
     return s:sid
 endfun
 
-" FUNCTION: s:NERDTreeGitStatusKeyMapping {{{2
+" FUNCTION: s:NERDTreeGitStatusKeyMapping() {{{1
 function! s:NERDTreeGitStatusKeyMapping()
     let l:s = '<SNR>' . s:SID() . '_'
 
@@ -256,10 +260,12 @@ function! s:NERDTreeGitStatusKeyMapping()
 
 endfunction
 
-augroup nerdtreegitplugin
+augroup NERDTreeGitPluginCursorHoldUpdate
+    autocmd!
     autocmd CursorHold * silent! call s:CursorHoldUpdate()
 augroup END
-" FUNCTION: s:CursorHoldUpdate() {{{2
+
+" FUNCTION: s:CursorHoldUpdate() {{{1
 function! s:CursorHoldUpdate()
     if g:NERDTreeUpdateOnCursorHold != 1
         return
@@ -285,10 +291,12 @@ function! s:CursorHoldUpdate()
     exec l:winnr . 'wincmd w'
 endfunction
 
-augroup nerdtreegitplugin
+augroup NERDTreeGitPluginFileUpdate
+    autocmd!
     autocmd BufWritePost * call s:FileUpdate(expand('%:p'))
 augroup END
-" FUNCTION: s:FileUpdate(fname) {{{2
+
+" FUNCTION: s:FileUpdate(fname) {{{1
 function! s:FileUpdate(fname)
     if g:NERDTreeUpdateOnWrite != 1
         return
@@ -319,9 +327,12 @@ function! s:FileUpdate(fname)
     exec l:winnr . 'wincmd w'
 endfunction
 
-augroup AddHighlighting
+augroup NERDTreeGitStatusAddHighlighting
+    autocmd!
     autocmd FileType nerdtree call s:AddHighlighting()
 augroup END
+
+" FUNCTION: s:AddHighlighting() {{{1
 function! s:AddHighlighting()
     let l:synmap = {
                 \ 'NERDTreeGitStatusModified'    : s:NERDTreeGetIndicator('Modified'),
@@ -348,6 +359,7 @@ function! s:AddHighlighting()
     hi def link NERDTreeGitStatusIgnored DiffAdd
 endfunction
 
+" FUNCTION: s:SetupListeners() {{{1
 function! s:SetupListeners()
     call g:NERDTreePathNotifier.AddListener('init', 'NERDTreeGitStatusRefreshListener')
     call g:NERDTreePathNotifier.AddListener('refresh', 'NERDTreeGitStatusRefreshListener')
@@ -358,3 +370,27 @@ if g:NERDTreeShowGitStatus && executable('git')
     call s:NERDTreeGitStatusKeyMapping()
     call s:SetupListeners()
 endif
+
+" License {{{1
+"
+" Copyright (C) 2018 Jan Moeller <secded@gmail.com>
+"
+" Permission is hereby granted, free of charge, to any person obtaining a copy
+" of this software and associated documentation files (the "Software"), to deal
+" in the Software without restriction, including without limitation the rights
+" to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+" copies of the Software, and to permit persons to whom the Software is
+" furnished to do so, subject to the following conditions:
+"
+" The above copyright notice and this permission notice shall be included in
+" all copies or substantial portions of the Software.
+"
+" THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+" IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+" FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+" AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+" LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+" OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+" THE SOFTWARE.
+"
+" vim:ft=vim:tw=78:sw=2:ts=2:sts=2:et:fdm=marker
